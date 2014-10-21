@@ -17,7 +17,6 @@ fetchlist = (id, cb, param) ->
     pid = /t=(\d+)$/.exec link
     if !pid => pid = 0
     else pid = pid.1
-    console.log pid
     if link => posts.push {title, link, reply, time, pid}
   cb posts, param
 
