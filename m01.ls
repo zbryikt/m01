@@ -5,6 +5,7 @@ httpheader = "User-Agent": ua
 if !fs.exists-sync('config') => fs.mkdir-sync 'config'
 if fs.exists-sync 'config/m01' => config = JSON.parse(fs.read-file-sync 'config/m01' .toString!)
 else => config = {}
+if !config.date => config.date = new Date(0)
 
 if !fs.exists-sync 'raw' => fs.mkdir-sync 'raw'
 if !fs.exists-sync 'raw/m01' => fs.mkdir-sync 'raw/m01'
@@ -85,7 +86,7 @@ findlength = (callback) ->
   fetchlist 1, cb, 1
 
 fetch-post-date = (item, cb) ->
-  <- setTimeout _, 1000
+  <- setTimeout _, 1500
   (e,r,b) <- request do
     url: "http://www.mobile01.com/#{item.link}"
     headers: httpheader
@@ -98,7 +99,7 @@ fetch-post-date = (item, cb) ->
   cb date
 
 fetch-page-date = (page, cb) ->
-  <- setTimeout _, 1000
+  <- setTimeout _, 1500
   (e,r,b) <- request do
     url: "http://www.mobile01.com/topiclist.php?f=356&p=#page"
     headers: httpheader
@@ -120,13 +121,15 @@ find-last-fetch = (date,L,R,cb) ->
   if L>=R => return cb L - 1
   M = parseInt((L + R) / 2)
   (d) <- fetch-page-date M
-  if date < d => R := M
+  console.log "page #M: #d"
+  if date > d => R := M
   else L := M + 1
   setTimeout (-> find-last-fetch date, L, R, cb), 0
 
-fetch-page-date 700, -> console.log it
-(page) <- find-last-fetch new Date(2010,10,10), 1, 710, _
-console.log page
+(len) <- findlength
+(page) <- find-last-fetch config.date, 1, len, _
+fetchpost page
+#console.log page
 
 #findlength -> console.log it
 /*fetchpost 710
